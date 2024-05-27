@@ -8,11 +8,11 @@ import java.sql.SQLException;
 public class JdbcRunner {
     public static void main(String[] args) throws SQLException {
         String sql = """
-                DROP SCHEMA game;
-                """;
+                DROP TABLE info;
+                                """;
         try (var connection = ConnectionManager.open();
              var statement = connection.createStatement()) {
-            System.out.println(statement.execute(sql));
+            System.out.println(statement.executeUpdate(sql));
         }
     }
 }

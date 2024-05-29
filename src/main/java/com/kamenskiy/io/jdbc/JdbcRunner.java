@@ -37,7 +37,7 @@ public class JdbcRunner {
                 SELECT id FROM ticket t 
                 WHERE t.flight_id = ?;
                 """;
-        try (var connection = ConnectionManager.open();
+        try (var connection = ConnectionManager.get();
              var statement = connection.prepareStatement(sqlThickets);) {
             statement.setLong(1, flightId);
             var result = statement.executeQuery();
@@ -56,7 +56,7 @@ public class JdbcRunner {
                 SELECT * FROM flight
                 WHERE departure_date BETWEEN ? AND ?;
                                 """;
-        try (Connection connection = ConnectionManager.open();
+        try (Connection connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(sqlAllFlights)) {
             preparedStatement.setQueryTimeout(10);
             preparedStatement.setFetchSize(2);
@@ -77,7 +77,7 @@ public class JdbcRunner {
     }
 
     public static void getMetadata() throws SQLException {
-        try (Connection connection = ConnectionManager.open();) {
+        try (Connection connection = ConnectionManager.get();) {
             DatabaseMetaData metaData = connection.getMetaData();
             ResultSet catalogs = metaData.getCatalogs();
             while (catalogs.next()) {

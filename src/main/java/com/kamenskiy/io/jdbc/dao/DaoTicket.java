@@ -27,8 +27,32 @@ public class DaoTicket {
             WHERE id = ?;
                                           """;
 
-    public Optional<Ticket> findById(Long id) {
+    private static final String UPDATE_SQL = """
+            UPDATE ticket 
+            SET passport_no = ?,
+                passenger_name = ?,
+                flight_id = ?,
+                seat_no = ?,
+                cost = ?
+            WHERE id = ?;
+                                    """;
 
+    public boolean update(Ticket ticket) {
+        try (var connection = ConnectionManager.get();
+             var statement = connection.prepareStatement(UPDATE_SQL)) {
+            statement.setString(1, ticket.getPassportNo());
+            statement.setString(2, ticket.getPassengerName());
+            statement.setLong(3, ticket.getFlightId());
+            statement.setString(4, ticket.getSeatNo());
+            statement.setBigDecimal(5, ticket.getCost());
+            statement.setLong(6, ticket.getId());
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Optional<Ticket> findById(Long id) {
         try (var connection = ConnectionManager.get();
              var statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
             statement.setLong(1, id);
@@ -37,7 +61,7 @@ public class DaoTicket {
             if (resultSet.next()) {
                 ticket = buildTicket(resultSet);
             }
-            return  Optional.ofNullable(ticket);
+            return Optional.ofNullable(ticket);
         } catch (SQLException e) {
             throw new DaoException(e);
         }

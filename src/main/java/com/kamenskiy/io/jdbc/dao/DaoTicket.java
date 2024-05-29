@@ -7,6 +7,7 @@ import com.kamenskiy.io.jdbc.utils.ConnectionManager;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class DaoTicket {
     private static final DaoTicket INSTANCE = new DaoTicket();
@@ -19,8 +20,28 @@ public class DaoTicket {
             WHERE id = ?;
                                           """;
     private static final String FIND_ALL_SQL = """
-            SELECT id, passport_no, passenger_name, flight_id, seat_no, cost FROM ticket;
+            SELECT id, passport_no, passenger_name, flight_id, seat_no, cost FROM ticket
                                           """;
+
+    private static final String FIND_BY_ID_SQL = FIND_ALL_SQL + """
+            WHERE id = ?;
+                                          """;
+
+    public Optional<Ticket> findById(Long id) {
+
+        try (var connection = ConnectionManager.get();
+             var statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+            statement.setLong(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            Ticket ticket = null;
+            if (resultSet.next()) {
+                ticket = buildTicket(resultSet);
+            }
+            return  Optional.ofNullable(ticket);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
 
     public List<Ticket> findAll() {
         List<Ticket> tickets = new ArrayList<>();
@@ -28,20 +49,25 @@ public class DaoTicket {
              var preparedStatement = connection.prepareStatement(FIND_ALL_SQL)) {
             var resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                Ticket ticket = new Ticket(
-                        resultSet.getLong("id"),
-                        resultSet.getString("passport_no"),
-                        resultSet.getString("passenger_name"),
-                        resultSet.getLong("flight_id"),
-                        resultSet.getString("seat_no"),
-                        resultSet.getBigDecimal("cost")
+                tickets.add(
+                        buildTicket(resultSet)
                 );
-                tickets.add(ticket);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return tickets;
+    }
+
+    private static Ticket buildTicket(ResultSet resultSet) throws SQLException {
+        return new Ticket(
+                resultSet.getLong("id"),
+                resultSet.getString("passport_no"),
+                resultSet.getString("passenger_name"),
+                resultSet.getLong("flight_id"),
+                resultSet.getString("seat_no"),
+                resultSet.getBigDecimal("cost")
+        );
     }
 
     public Ticket save(Ticket ticket) {

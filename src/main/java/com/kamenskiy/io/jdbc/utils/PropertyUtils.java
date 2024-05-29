@@ -1,4 +1,4 @@
-package com.kamenskiy.io.utils;
+package com.kamenskiy.io.jdbc.utils;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -17,6 +17,7 @@ public final class PropertyUtils {
             throw new RuntimeException(e);
         }
     }
+
     public static String getProperty(String key) {
         return PROPERTIES.getProperty(key);
     }

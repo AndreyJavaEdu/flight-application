@@ -1,4 +1,4 @@
-package com.kamenskiy.io.utils;
+package com.kamenskiy.io.jdbc.utils;
 
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
@@ -14,6 +14,7 @@ public final class ConnectionManager {
     private static final int DEFAULT_POOL_SIZE = 10;
     private static final String POOL_SIZE_KEY = "db.pool.size";
     private static BlockingQueue<Connection> pool;
+
     static {
         initConnectionPool();
     }
@@ -31,7 +32,8 @@ public final class ConnectionManager {
             pool.add(proxyConnection);
         }
     }
-    public static Connection get(){
+
+    public static Connection get() {
         try {
             return pool.take();
         } catch (InterruptedException e) {

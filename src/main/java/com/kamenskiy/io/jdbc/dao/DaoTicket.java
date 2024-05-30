@@ -1,5 +1,6 @@
 package com.kamenskiy.io.jdbc.dao;
 
+import com.kamenskiy.io.jdbc.dto.TicketFilter;
 import com.kamenskiy.io.jdbc.entity.Ticket;
 import com.kamenskiy.io.jdbc.exceptions.DaoException;
 import com.kamenskiy.io.jdbc.utils.ConnectionManager;
@@ -8,8 +9,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class DaoTicket {
+public class DaoTicket implements Dao<Long, Ticket> {
     private static final DaoTicket INSTANCE = new DaoTicket();
     private static final String SAVE_SQL = """
             INSERT INTO ticket (passport_no, passenger_name, flight_id, seat_no, cost)
@@ -65,6 +67,46 @@ public class DaoTicket {
         } catch (SQLException e) {
             throw new DaoException(e);
         }
+    }
+
+    public List<Ticket> findAll(TicketFilter filter) {
+        List<Ticket> tickets = new ArrayList<>();
+
+        List<Object> parameters = new ArrayList<>();
+        List<String> whereSql = new ArrayList<>();
+        if (filter.passengerName() != null) {
+            parameters.add(filter.passengerName());
+            whereSql.add("passenger_name=?");
+        }
+        if (filter.seatNo() != null) {
+            parameters.add("%" + filter.seatNo() + "%");
+            whereSql.add("seat_no like ?");
+        }
+        parameters.add(filter.limit());
+        parameters.add(filter.offset());
+        String whereStr = whereSql.stream().collect(Collectors.joining(
+                " AND ",
+                parameters.size() > 2 ? " WHERE " : " ",
+                " LIMIT ? OFFSET ? "));
+        String sql = FIND_ALL_SQL + whereStr;
+
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(sql)) {
+            System.out.println(preparedStatement);
+            for (int i = 0; i < parameters.size(); i++) {
+                preparedStatement.setObject(i + 1, parameters.get(i));
+            }
+            System.out.println(preparedStatement);
+            var resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                tickets.add(
+                        buildTicket(resultSet)
+                );
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return tickets;
     }
 
     public List<Ticket> findAll() {

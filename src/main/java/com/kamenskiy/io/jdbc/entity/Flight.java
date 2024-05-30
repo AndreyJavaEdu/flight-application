@@ -109,4 +109,18 @@ public class Flight {
         return Objects.hash(id, flightNo, departureDate, departureAirportCode, arrivalDate,
                 arrivalAirportCode, aircraftId, status);
     }
+
+    @Override
+    public String toString() {
+        return "Flight{" +
+               "id=" + id +
+               ", flightNo='" + flightNo + '\'' +
+               ", departureDate=" + departureDate +
+               ", departureAirportCode='" + departureAirportCode + '\'' +
+               ", arrivalDate=" + arrivalDate +
+               ", arrivalAirportCode='" + arrivalAirportCode + '\'' +
+               ", aircraftId=" + aircraftId +
+               ", status=" + status +
+               '}';
+    }
 }

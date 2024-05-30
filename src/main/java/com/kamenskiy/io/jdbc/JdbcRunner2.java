@@ -11,7 +11,7 @@ public class JdbcRunner2 {
         Ticket ticket = new Ticket();
         ticket.setPassportNo("asdf1");
         ticket.setPassengerName("Serious Sam");
-        ticket.setFlightId(4L);
+//        ticket.setFlight(4L);
         ticket.setSeatNo("D1");
         ticket.setCost(BigDecimal.TEN);
 

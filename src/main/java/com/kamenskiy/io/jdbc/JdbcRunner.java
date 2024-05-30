@@ -1,6 +1,6 @@
 package com.kamenskiy.io.jdbc;
 
-import com.kamenskiy.io.utils.ConnectionManager;
+import com.kamenskiy.io.jdbc.utils.ConnectionManager;
 
 import java.sql.*;
 import java.time.LocalDate;
